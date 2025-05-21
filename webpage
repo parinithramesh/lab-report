@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <style>
+        /* Basic CSS for a calculator layout (you'd put this in a separate .css file normally) */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .calculator {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        .calculator-display {
+            width: 100%;
+            height: 60px;
+            background-color: #eee;
+            border: none;
+            text-align: right;
+            padding: 10px;
+            font-size: 2em;
+            margin-bottom: 15px;
+            box-sizing: border-box; /* Include padding in the element's total width and height */
+            border-radius: 4px;
+        }
+
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calculator-buttons button {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            transition: background-color 0.2s ease;
+        }
+
+        .calculator-buttons button:hover {
+            background-color: #d0d0d0;
+        }
+
+        .calculator-buttons .operator {
+            background-color: #ff9500;
+            color: white;
+        }
+
+        .calculator-buttons .operator:hover {
+            background-color: #e68a00;
+        }
+
+        .calculator-buttons .equals {
+            grid-column: span 2; /* Make the equals button span two columns */
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .calculator-buttons .equals:hover {
+            background-color: #45a049;
+        }
+
+        .calculator-buttons .clear {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .calculator-buttons .clear:hover {
+            background-color: #da190b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <input type="text" class="calculator-display" id="display" disabled>
+        <div class="calculator-buttons">
+            <button class="clear" id="clear">C</button>
+            <button class="operator" id="divide">/</button>
+            <button class="operator" id="multiply">*</button>
+            <button class="operator" id="subtract">-</button>
+
+            <button id="seven">7</button>
+            <button id="eight">8</button>
+            <button id="nine">9</button>
+            <button class="operator" id="add">+</button>
+
+            <button id="four">4</button>
+            <button id="five">5</button>
+            <button id="six">6</button>
+            <button id="decimal">.</button>
+
+            <button id="one">1</button>
+            <button id="two">2</button>
+            <button id="three">3</button>
+            <button class="equals" id="equals">=</button>
+
+            <button id="zero">0</button>
+        </div>
+    </div>
+
+    <script>
+        // Basic JavaScript for calculator logic (you'd put this in a separate .js file normally)
+        const display = document.getElementById('display');
+        const buttons = document.querySelectorAll('.calculator-buttons button');
+
+        let currentInput = '';
+        let operator = null;
+        let previousInput = '';
+        let shouldResetDisplay = false;
+
+        buttons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const buttonText = e.target.textContent;
+
+                if (e.target.id === 'clear') {
+                    currentInput = '';
+                    operator = null;
+                    previousInput = '';
+                    display.value = '';
+                    shouldResetDisplay = false;
+                    return;
+                }
+
+                if (e.target.classList.contains('operator') && e.target.id !== 'equals') {
+                    if (currentInput === '' && previousInput === '') return; // No input yet
+
+                    if (previousInput !== '' && currentInput !== '' && operator !== null) {
+                        calculate(); // Perform previous operation if continuous operations
+                    }
+
+                    operator = buttonText;
+                    previousInput = currentInput === '' ? previousInput : currentInput;
+                    currentInput = '';
+                    shouldResetDisplay = true;
+                    return;
+                }
+
+                if (e.target.id === 'equals') {
+                    calculate();
+                    operator = null; // Reset operator after calculation
+                    shouldResetDisplay = true;
+                    return;
+                }
+
+                if (e.target.id === 'decimal') {
+                    if (shouldResetDisplay) {
+                        currentInput = '0.';
+                        shouldResetDisplay = false;
+                    } else if (!currentInput.includes('.')) {
+                        currentInput += '.';
+                    }
+                    display.value = currentInput;
+                    return;
+                }
+
+                if (shouldResetDisplay) {
+                    currentInput = buttonText;
+                    shouldResetDisplay = false;
+                } else {
+                    currentInput += buttonText;
+                }
+                display.value = currentInput;
+            });
+        });
+
+        function calculate() {
+            if (previousInput === '' || currentInput === '' || operator === null) return;
+
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+
+            switch (operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        result = 'Error'; // Handle division by zero
+                    } else {
+                        result = prev / current;
+                    }
+                    break;
+                default:
+                    return;
+            }
+
+            display.value = result;
+            currentInput = result.toString();
+            previousInput = ''; // Clear previous input for next calculation
+        }
+    </script>
+</body>
+</html>
